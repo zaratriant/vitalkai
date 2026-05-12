@@ -1,0 +1,13 @@
+<!-- AI Brain Icon -->
+<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="brainGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1" />
+      <stop offset="100%" style="stop-color:#0ea5e9" />
+    </linearGradient>
+  </defs>
+  <rect x="8" y="8" width="48" height="48" rx="12" fill="url(#brainGrad)" />
+  <path d="M24 28 C24 28 20 24 24 20 C28 16 32 20 32 24 C32 28 36 24 40 20 C44 16 48 20 48 24 C48 28 44 32 40 36 C36 40 32 44 32 44 C32 44 28 40 24 36 C20 32 16 28 24 28" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" />
+  <circle cx="28" cy="30" r="2" fill="white" />
+  <circle cx="36" cy="30" r="2" fill="white" />
+</svg>
