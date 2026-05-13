@@ -1,8 +1,4 @@
 {
-  "name": "vitalkai",
-  "version": 2,
-  "domains": ["viralkai.com", "www.viralkai.com"],
-  "alias": ["viralkai.com"],
   "framework": "nextjs",
   "buildCommand": "npm run build",
   "devCommand": "npm run dev",
