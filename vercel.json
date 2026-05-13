@@ -1,0 +1,10 @@
+{
+  "name": "vitalkai",
+  "version": 2,
+  "domains": ["vitalkai.com", "www.vitalkai.com"],
+  "alias": ["vitalkai.com"],
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install"
+}
