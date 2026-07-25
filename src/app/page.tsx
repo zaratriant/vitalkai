@@ -297,7 +297,7 @@ export default function Home() {
                 className="group relative w-full py-4 rounded-md font-mono text-sm uppercase tracking-wider-2 text-white overflow-hidden disabled:opacity-50 transition-all">
                 <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-red-700 group-hover:from-red-500 group-hover:to-orange-600 transition-all" />
                 <span className="relative flex items-center justify-center gap-2">
-                  {formStatus === "submitting" ? "PROCESSING..." : "▶ Submit AI Audit Request"}
+                  {formStatus === "submitting" ? "PROCESSING..." : "▶ Transform Your Business!"}
                 </span>
               </button>
             </form>
