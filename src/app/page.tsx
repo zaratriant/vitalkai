@@ -1,11 +1,30 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+
+// Generate a random math challenge
+function useHumanChallenge() {
+  const [challenge, setChallenge] = useState(() => generateChallenge());
+
+  function generateChallenge() {
+    const a = Math.floor(Math.random() * 8) + 2; // 2-9
+    const b = Math.floor(Math.random() * 8) + 2; // 2-9
+    const ops = ['+', '-'] as const;
+    const op = ops[Math.floor(Math.random() * ops.length)];
+    const answer = op === '+' ? a + b : a - b;
+    return { a, b, op, answer, id: `${a}${op}${b}${Date.now()}` };
+  }
+
+  return { challenge, newChallenge: () => setChallenge(generateChallenge()) };
+}
 
 export default function Home() {
   const [formData, setFormData] = useState({ name: "", email: "", company: "", challenge: "" });
   const [formStatus, setFormStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [scrolled, setScrolled] = useState(false);
+  const [humanAnswer, setHumanAnswer] = useState("");
+  const [humanError, setHumanError] = useState(false);
+  const { challenge: hc, newChallenge } = useHumanChallenge();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -15,11 +34,21 @@ export default function Home() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Verify human challenge
+    if (parseInt(humanAnswer) !== hc.answer) {
+      setHumanError(true);
+      newChallenge();
+      setHumanAnswer("");
+      return;
+    }
+    setHumanError(false);
+
     setFormStatus("submitting");
     try {
-      const res = await fetch("/api/lead", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(formData) });
-      if (res.ok) { setFormStatus("success"); setFormData({ name: "", email: "", company: "", challenge: "" }); }
-      else { setFormStatus("error"); }
+      const res = await fetch("/api/lead", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...formData, hc_id: hc.id, hc_answer: humanAnswer }) });
+      if (res.ok) { setFormStatus("success"); setFormData({ name: "", email: "", company: "", challenge: "" }); setHumanAnswer(""); newChallenge(); }
+      else { setFormStatus("error"); newChallenge(); setHumanAnswer(""); }
     } catch { setFormStatus("error"); }
   };
 
@@ -293,6 +322,38 @@ export default function Home() {
                   ERROR: Transmission failed. Email hello@vitalkai.com
                 </div>
               )}
+
+              {/* Human Challenge */}
+              <div className="panel rounded-md p-4 border border-[#1a1a24]">
+                <label className="block text-xs font-mono uppercase tracking-wider-2 text-[#4b5563] mb-2">
+                  // VERIFY HUMAN
+                </label>
+                <div className="flex items-center gap-3">
+                  <span className="font-mono text-lg text-white select-none">
+                    {hc.a} {hc.op} {hc.b} = ?
+                  </span>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={humanAnswer}
+                    onChange={(e) => { setHumanAnswer(e.target.value); setHumanError(false); }}
+                    className="w-20 bg-[#050507] border border-[#1a1a24] rounded-md px-3 py-2 text-white placeholder-[#4b5563] focus:outline-none focus:border-red-500/50 focus:ring-1 focus:ring-red-500/50 transition font-mono text-sm"
+                    placeholder="?"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => { newChallenge(); setHumanAnswer(""); setHumanError(false); }}
+                    className="text-xs font-mono text-[#4b5563] hover:text-white transition-colors"
+                    title="New challenge"
+                  >
+                    ↻
+                  </button>
+                </div>
+                {humanError && (
+                  <p className="text-xs text-red-400 font-mono mt-2">❌ Incorrect. Try again.</p>
+                )}
+              </div>
+
               <button type="submit" disabled={formStatus === "submitting"}
                 className="group relative w-full py-4 rounded-md font-mono text-sm uppercase tracking-wider-2 text-white overflow-hidden disabled:opacity-50 transition-all">
                 <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-red-700 group-hover:from-red-500 group-hover:to-orange-600 transition-all" />

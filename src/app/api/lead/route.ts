@@ -86,7 +86,7 @@ async function saveToDrive(accessToken: string, leadData: Record<string, string>
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, email, company, challenge, message } = body;
+    const { name, email, company, challenge, message, hc_answer } = body;
 
     const msg = challenge || message;
 
@@ -101,6 +101,28 @@ export async function POST(request: Request) {
     if (!emailRegex.test(email)) {
       return NextResponse.json({ error: 'Invalid email format' }, { status: 400 });
     }
+
+    // Bot detection: check for human challenge answer
+    if (hc_answer === undefined || hc_answer === null || hc_answer === '') {
+      return NextResponse.json({ error: 'Human verification required' }, { status: 403 });
+    }
+
+    // Additional bot detection heuristics
+    const suspiciousPatterns = [
+      /https?:\/\//i, // URLs in name field
+      /\[url=|\[link=|\[img=/i, // BBCode spam
+      /viagra|cialis|casino|lottery|crypto.?invest/i, // Common spam keywords
+      /(.)\1{4,}/i, // Repeated characters (aaaaa, 11111)
+    ];
+    const allText = `${name} ${email} ${company || ''} ${msg}`.toLowerCase();
+    const isSpam = suspiciousPatterns.some(p => p.test(allText));
+    if (isSpam) {
+      console.log('Spam detected:', { name, email, company, msg: msg.substring(0, 100) });
+      return NextResponse.json({ error: 'Submission rejected' }, { status: 403 });
+    }
+
+    // Rate limiting: check if too many submissions from same email recently
+    // (basic check via Vercel's request metadata would go here in production)
 
     const leadData = {
       name, email,
